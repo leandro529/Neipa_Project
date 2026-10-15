@@ -1,0 +1,86 @@
+# Levanta todo el stack de un saque: MySQL + backend (Spring Boot, con
+# schema.sql/data.sql aplicados solos al arrancar) + frontend (React,
+# servido como build estatico por nginx). No hace falta tener Java, Maven
+# ni Node instalados: todo se compila dentro de las imagenes.
+#
+# Uso:
+#   docker compose up --build
+#   (con Docker Desktop / Docker Engine ya corriendo)
+#
+# Despues:
+#   Web:      http://localhost:5173
+#   API:      http://localhost:8080/api/dashboard/resumen
+#   MySQL:    localhost:3306 (usuario root, contrasena MYSQL_ROOT_PASSWORD del .env, base "neipa")
+#
+# Las contrasenas NO se versionan: se leen del archivo .env de esta carpeta
+# (copiar .env.example a .env y completar; probar-neipa.ps1 lo genera solo).
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: neipa-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: neipa
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Falta MYSQL_ROOT_PASSWORD en el archivo .env (ver .env.example)}
+    ports:
+      - "3306:3306"
+    volumes:
+      - neipa-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neipa-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Sobreescribe application.yml (que apunta a XAMPP/localhost para el
+      # uso sin Docker) sin tocar ese archivo: Spring Boot le da prioridad a
+      # las variables de entorno sobre application.yml.
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/neipa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true&rewriteBatchedStatements=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Falta MYSQL_ROOT_PASSWORD en el archivo .env (ver .env.example)}
+      # Dumps de CM de NetAct: la carpeta external_data del repo (fuera de git)
+      # se monta en solo lectura.
+      NEIPA_CM_CARPETA: /datos/cm
+      # Cifra las contrasenas de las conexiones directas a bases de CM.
+      # Cambiarla en un despliegue real (por ejemplo con un archivo .env).
+      NEIPA_CM_CLAVE_CONEXIONES: ${NEIPA_CM_CLAVE_CONEXIONES:?Falta NEIPA_CM_CLAVE_CONEXIONES en el archivo .env (ver .env.example)}
+      JAVA_TOOL_OPTIONS: -Xmx2g
+    volumes:
+      - ../external_data:/datos/cm:ro
+    # Para conectarse a una base de CM que corre en la misma PC usar el host
+    # host.docker.internal en la URL (por ejemplo jdbc:postgresql://host.docker.internal:5432/cm).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # La SPA queda compilada apuntando a localhost:8080: funciona porque
+        # el navegador del usuario (no el contenedor) es quien le pega a la
+        # API, y el puerto 8080 del backend ya esta expuesto al host arriba.
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: neipa-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  neipa-mysql-data:

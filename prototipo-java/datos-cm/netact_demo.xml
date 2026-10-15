@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Exportacion de CM FICTICIA con el formato RAML 2.0 de NetAct (datos de prueba de NEIPA). -->
+<raml xmlns="raml20.xsd" version="2.0">
+ <cmData type="actual" scope="all" name="demo_netact">
+  <header>
+   <log dateTime="2026-10-15T08:00:00" action="created" appInfo="ActualExporter">Ficticio</log>
+  </header>
+  <managedObject class="LNBTS" version="xL23R3" distName="PLMN-PLMN/MRBTS-101/LNBTS-101" id="101">
+   <p name="name">CM_SITE_101</p>
+   <p name="actDLCAggr">1</p>
+  </managedObject>
+  <managedObject class="LNCEL" version="xL23R3" distName="PLMN-PLMN/MRBTS-101/LNBTS-101/LNCEL-1" id="1">
+   <p name="name">CM_SITE_101_A</p>
+   <p name="bandaMHz">700</p>
+   <p name="pMax">43</p>
+   <p name="dlChBw">100</p>
+   <list name="drxProfile2">
+    <item><p name="drxInactivityT">10</p></item>
+   </list>
+  </managedObject>
+  <managedObject class="CADPR" version="xL23R3" distName="PLMN-PLMN/MRBTS-101/LNBTS-101/LNCEL-1/CADPR-1" id="1">
+   <p name="a3Offset">-3</p>
+   <p name="a3TimeToTrigger">320</p>
+  </managedObject>
+  <managedObject class="LNCEL" version="xL23R3" distName="PLMN-PLMN/MRBTS-101/LNBTS-101/LNCEL-2" id="2">
+   <p name="name">CM_SITE_101_B</p>
+   <p name="bandaMHz">700</p>
+   <p name="pMax">46</p>
+   <p name="dlChBw">100</p>
+   <list name="drxProfile2">
+    <item><p name="drxInactivityT">10</p></item>
+   </list>
+  </managedObject>
+  <managedObject class="CADPR" version="xL23R3" distName="PLMN-PLMN/MRBTS-101/LNBTS-101/LNCEL-2/CADPR-1" id="1">
+   <p name="a3Offset">-6</p>
+   <p name="a3TimeToTrigger">320</p>
+  </managedObject>
+  <managedObject class="LNBTS" version="xL23R3" distName="PLMN-PLMN/MRBTS-102/LNBTS-102" id="102">
+   <p name="name">CM_SITE_102</p>
+   <p name="actDLCAggr">1</p>
+  </managedObject>
+  <managedObject class="LNCEL" version="xL23R3" distName="PLMN-PLMN/MRBTS-102/LNBTS-102/LNCEL-1" id="1">
+   <p name="name">CM_SITE_102_A</p>
+   <p name="bandaMHz">700</p>
+   <p name="pMax">35</p>
+   <p name="dlChBw">100</p>
+   <list name="drxProfile2">
+    <item><p name="drxInactivityT">10</p></item>
+   </list>
+  </managedObject>
+  <managedObject class="CADPR" version="xL23R3" distName="PLMN-PLMN/MRBTS-102/LNBTS-102/LNCEL-1/CADPR-1" id="1">
+   <p name="a3Offset">-6</p>
+   <p name="a3TimeToTrigger">320</p>
+  </managedObject>
+  <managedObject class="LNBTS" version="xL23R3" distName="PLMN-PLMN/MRBTS-103/LNBTS-103" id="103">
+   <p name="name">CM_test_103</p>
+   <p name="actDLCAggr">1</p>
+  </managedObject>
+  <managedObject class="LNCEL" version="xL23R3" distName="PLMN-PLMN/MRBTS-103/LNBTS-103/LNCEL-1" id="1">
+   <p name="name">CM_test_103_A</p>
+   <p name="bandaMHz">700</p>
+   <p name="pMax">46</p>
+   <p name="dlChBw">100</p>
+   <list name="drxProfile2">
+    <item><p name="drxInactivityT">10</p></item>
+   </list>
+  </managedObject>
+  <managedObject class="CADPR" version="xL23R3" distName="PLMN-PLMN/MRBTS-103/LNBTS-103/LNCEL-1/CADPR-1" id="1">
+   <p name="a3Offset">0</p>
+   <p name="a3TimeToTrigger">320</p>
+  </managedObject>
+ </cmData>
+</raml>

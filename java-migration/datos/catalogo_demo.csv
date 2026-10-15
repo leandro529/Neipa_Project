@@ -1,0 +1,14 @@
+fuente,release,tecnologia,clase,ruta_clase,parametro,parametro_doc,estructura,nombre,tipo,unidad,rango,minimo,maximo,paso,minimo_interno,maximo_interno,paso_interno,enumeracion,formula,default_valor,default_interno,modificacion,funciones,relacionados,relaciones,descripcion
+catalogo_demo (ficticio),demo,LTE FDD,LNCEL,MRBTS/LNBTS/LNCEL,n310Qci1,n310Qci1,,N310 for QCI1,Enumeration,,"1: n1
+2: n2
+4: n4
+6: n6
+8: n8",,,,,,,1=n1|2=n2|4=n4|6=n6|8=n8,,,,On-line,,LNBTS - actFoo,,Ficticio: cantidad de indicaciones out of sync para UE con QCI1.
+catalogo_demo (ficticio),demo,LTE FDD,LNCEL,MRBTS/LNBTS/LNCEL,t310Qci1,t310Qci1,,T310 for QCI1,Enumeration,,"0: 0ms
+200: 200ms
+1000: 1000ms",,,,,,,0=0ms|200=200ms|1000=1000ms,,,,On-line,,,,Ficticio: timer de recuperacion para UE con QCI1.
+catalogo_demo (ficticio),demo,LTE FDD,LNCEL,MRBTS/LNBTS/LNCEL,pMax,pMax,,Maximum output power,Number,dBm,"11...43 dBm, step 1 dBm",11,43,1,110,430,10,,internal_value = gui_value * 10,,,Requires object locking,,,,Ficticio: potencia maxima de la celda.
+catalogo_demo (ficticio),demo,LTE FDD,SIB,MRBTS/LNBTS/LNCEL/SIB,n310,n310,,N310,Enumeration,,"1: n1
+4: n4
+6: n6",,,,,,,1=n1|4=n4|6=n6,,,,On-line,,,,Ficticio.
+catalogo_demo (ficticio),demo,LTE FDD,LNBTS,MRBTS/LNBTS,actFoo,actFoo,,Activate foo (ficticio),Boolean,,"0 (false), 1 (true)",,,,,,,0=false|1=true,,0,0,On-line,,,,Ficticio.

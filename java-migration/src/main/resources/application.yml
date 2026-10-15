@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: neipa-java
+
+  datasource:
+    # XAMPP / MySQL local, tal como establece RNF15 del trabajo practico.
+    # allowPublicKeyRetrieval=true: MySQL 8 usa caching_sha2_password por
+    # defecto, que sin SSL necesita este flag para poder autenticar (si no,
+    # tira "Public Key Retrieval is not allowed" al arrancar). No es un
+    # problema de seguridad relevante aca: es conexion local/dev.
+    url: jdbc:mysql://localhost:3306/neipa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true&rewriteBatchedStatements=true
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    # El esquema NO lo genera Hibernate: se crea a partir de schema.sql (el mismo DDL
+    # ya presentado y verificado en la segunda entrega, mas las tablas nuevas de
+    # valores_estandar/excepciones), para no correr riesgo de que la estrategia de
+    # nombres de Hibernate difiera de las columnas reales.
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+
+  batch:
+    job:
+      # El job no se dispara solo al arrancar la aplicacion: se dispara desde
+      # AuditoriaController, una vez por segmento a auditar.
+      enabled: false
+    jdbc:
+      # Spring Boot crea automaticamente las tablas de metadata de Spring Batch
+      # (BATCH_JOB_INSTANCE, BATCH_STEP_EXECUTION, etc.) usando el script oficial
+      # para MySQL que trae spring-batch-core.
+      initialize-schema: always
+
+# Origenes permitidos por CORS para la SPA React (ver CorsConfig). Ajustar si
+# el frontend se sirve desde otro puerto/host (por ejemplo, un build estatico
+# servido por nginx en produccion).
+neipa:
+  # Datos de CM de NetAct (dump SQLite). Carpeta donde se dejan los dumps;
+  # se importan desde la pantalla "Datos CM". Las vecindades no se importan.
+  cm:
+    carpeta: ../external_data
+    clases-excluidas: LNREL*,LNADJ*
+    # Secreto para cifrar las contrasenas de las conexiones directas a bases
+    # de CM (pantalla Datos CM > Conexiones). Configurarlo con la variable de
+    # entorno NEIPA_CM_CLAVE_CONEXIONES; si cambia, hay que volver a cargar
+    # las contrasenas.
+    clave-conexiones: ${NEIPA_CM_CLAVE_CONEXIONES:}
+  frontend:
+    origenes-permitidos: http://localhost:5173,http://localhost:3000
