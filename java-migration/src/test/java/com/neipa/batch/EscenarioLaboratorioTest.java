@@ -1,6 +1,7 @@
 package com.neipa.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -145,5 +146,25 @@ class EscenarioLaboratorioTest {
         }
         assertEquals(12, conformes);
         assertEquals(4, desvios);
+    }
+
+    @Test
+    void elementoSinExtractorSeOmiteYElRestoSeAudita() {
+        // Zona Sur 5G: Core-Sur-001 es HUAWEI (sin extractor). Antes la
+        // excepcion cortaba el job y no se guardaba nada del segmento.
+        ElementoDeRed huawei = new ElementoDeRed("Core-Sur-001", "5G", "HUAWEI", 2L);
+        huawei.setIdElemento(20L);
+        assertNull(processor.process(huawei));
+
+        ElementoDeRed desconocido = new ElementoDeRed("Sitio-Sur-099", "4G", "ZTE", 2L);
+        desconocido.setIdElemento(21L);
+        assertNull(processor.process(desconocido));
+
+        ElementoDeRed sinFabricante = new ElementoDeRed("Sitio-Sur-098", "4G", null, 2L);
+        sinFabricante.setIdElemento(22L);
+        assertNull(processor.process(sinFabricante));
+
+        // Un elemento NSN del mismo segmento se sigue auditando (4 parametros).
+        assertEquals(4, auditar(23, "Sitio-Sur-001", 2).size());
     }
 }

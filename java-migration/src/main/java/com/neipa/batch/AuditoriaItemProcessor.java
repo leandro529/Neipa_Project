@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,6 @@ import com.neipa.domain.Excepcion;
 import com.neipa.domain.ResultadoAuditoria;
 import com.neipa.domain.ValorEstandar;
 import com.neipa.extraction.EstandarProvider;
-import com.neipa.extraction.Fabricante;
 import com.neipa.extraction.ParametroVigente;
 import com.neipa.extraction.VendorExtractor;
 import com.neipa.extraction.VendorExtractorFactory;
@@ -31,9 +32,17 @@ import com.neipa.validation.ValidadorRango;
  * si hay desvio, busca una excepcion vigente (ExcepcionService). En los
  * desvios guarda ademas el valor objetivo, que despues se usa para generar
  * el XML RAML 2.0 de reconfiguracion.
+ *
+ * Si el elemento es de un fabricante sin extractor (hoy Huawei y Ericsson) o
+ * con un fabricante desconocido, no se audita: process() devuelve null, que
+ * Spring Batch interpreta como "item filtrado", y el resto de los elementos
+ * del segmento se sigue auditando. Antes la excepcion cortaba el job entero
+ * y no quedaba guardado ningun resultado del segmento.
  */
 @Component
 public class AuditoriaItemProcessor implements ItemProcessor<ElementoDeRed, List<Auditoria>> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AuditoriaItemProcessor.class);
 
     private final VendorExtractorFactory vendorExtractorFactory;
     private final EstandarProvider estandarProvider;
@@ -49,8 +58,10 @@ public class AuditoriaItemProcessor implements ItemProcessor<ElementoDeRed, List
 
     @Override
     public List<Auditoria> process(ElementoDeRed elemento) {
-        Fabricante fabricante = Fabricante.valueOf(elemento.getFabricante().toUpperCase());
-        VendorExtractor extractor = vendorExtractorFactory.crear(fabricante);
+        VendorExtractor extractor = extractorPara(elemento);
+        if (extractor == null) {
+            return null; // elemento no auditable: Spring Batch lo filtra y sigue con el resto
+        }
 
         List<ParametroVigente> parametrosVigentes = extractor.extraerParametrosVigentes(elemento);
 
@@ -100,5 +111,23 @@ public class AuditoriaItemProcessor implements ItemProcessor<ElementoDeRed, List
             auditorias.add(auditoria);
         }
         return auditorias;
+    }
+
+    /**
+     * Extractor del fabricante del elemento, o null si no se puede auditar
+     * (sin fabricante, fabricante desconocido o sin extractor implementado).
+     */
+    private VendorExtractor extractorPara(ElementoDeRed elemento) {
+        String fabricante = elemento.getFabricante();
+        if (fabricante == null || fabricante.trim().isEmpty()) {
+            LOG.warn("El elemento {} no tiene fabricante: no se audita", elemento.getNombre());
+            return null;
+        }
+        try {
+            return vendorExtractorFactory.crear(fabricante.trim());
+        } catch (UnsupportedOperationException | IllegalArgumentException ex) {
+            LOG.warn("El elemento {} ({}) no se audita: {}", elemento.getNombre(), fabricante, ex.getMessage());
+            return null;
+        }
     }
 }
